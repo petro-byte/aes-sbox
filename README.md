@@ -1,145 +1,129 @@
-# ACI AES S-Box — ISW Masking Implementation
+# Masked AES S-Box Implementation (ISW Scheme)
 
-This repository contains the implementation-focused parts of a coursework project from the **Advanced Cryptographic Implementations** course at the **Technical University of Munich (TUM)**.
+This repository contains the implementation-focused parts of a project exploring **side-channel resistant cryptographic implementations**.
 
-The project implements a **masked AES S-box using the ISW masking scheme** to protect against side-channel attacks. The implementation was developed in C inside a course-provided embedded development environment based on **OpenTitan, the Ibex RISC-V core, and QEMU simulation**.
+The code demonstrates how the AES S-box can be implemented using **higher-order masking techniques**, specifically the **ISW masking scheme (Ishai–Sahai–Wagner)**, in order to protect intermediate values against side-channel leakage.
 
-The repository preserves the **student-implemented components** of the project as a portfolio artifact.
+The implementation was developed in C within an embedded development environment based on a **RISC-V firmware stack and hardware simulation tools**.
+
+This repository preserves the **core implementation files** as a portfolio artifact.
 
 ---
 
-## Project Overview
+# Project Overview
 
-Modern cryptographic implementations must protect secret data not only against mathematical attacks but also against **physical leakage**, such as power consumption or electromagnetic radiation.
+Cryptographic algorithms deployed on real hardware can leak secret information through physical side channels such as:
 
-One of the most widely used countermeasures against such attacks is **masking**, where intermediate values are split into multiple random shares so that no single value reveals the secret.
+* power consumption
+* electromagnetic emissions
+* timing behavior
 
-This project implements a **higher-order masked AES S-box using the ISW scheme (Ishai–Sahai–Wagner)**. The implementation demonstrates:
+To mitigate these attacks, sensitive values can be split into multiple **randomized shares**.
+Masking ensures that no individual intermediate value directly reveals the underlying secret.
+
+This project demonstrates the implementation of a **masked AES S-box** using the **ISW masking scheme**, including:
 
 * masked finite-field arithmetic in **GF(2⁸)**
-* secure multiplications between masked values
+* secure multiplications on shared values
 * masked inversion in the AES field
-* reconstruction of the AES S-box
-* validation of the implementation against the standard AES S-box
+* reconstruction of the AES S-box output
+* validation against the reference AES S-box
 
 ---
 
-## Repository Contents
+# Repository Structure
 
-This repository contains only the **implementation-relevant files** developed or modified as part of the coursework:
+The repository intentionally contains **only the implementation-relevant components**.
 
-```
+```text
 src/
- ├─ aes_masking_isw.c   # Main masked AES S-box implementation
- ├─ aes_masking_isw.h   # Function interfaces and masking configuration
- └─ aes_const.h         # Reference AES S-box and GF arithmetic tables
+ ├─ aes_masking_isw.c
+ ├─ aes_masking_isw.h
+ └─ aes_const.h
 ```
 
-These files were originally integrated into a much larger embedded development environment.
+These files implement:
 
-The surrounding framework (OpenTitan codebase, build system, and simulation environment) is **not included in this repository**.
+* masked arithmetic primitives
+* secure multiplication
+* masked inversion
+* the masked AES S-box computation
+* reference tables for AES field arithmetic
+
+The surrounding firmware framework and simulation environment used during development are **not included**.
 
 ---
 
-## Implementation Details
+# Implementation Details
 
-The implementation demonstrates several core concepts used in side-channel resistant cryptographic software.
+## Masked Representation
 
-### Masked Representation
-
-A secret value `x` is split into multiple **shares**:
+A value `x` is split into multiple shares:
 
 ```
 x = x₀ ⊕ x₁ ⊕ ... ⊕ x_d
 ```
 
-where `d` is the masking order. In this implementation:
+where `d` denotes the **masking order**.
 
-```
-MASKING_ORDER = 3
-```
-
-as defined in the header file. 
+Each share individually appears random, while their XOR reconstructs the original value.
 
 ---
 
-### Secure Multiplication
+## Secure Multiplication
 
-Secure multiplication between masked values is implemented using the **ISW multiplication protocol**, which introduces fresh randomness to prevent leakage during intermediate computations.
+Multiplication between masked values is implemented using the **ISW multiplication protocol**, which introduces fresh randomness to prevent leakage during intermediate computations.
 
-The implementation uses random values generated via a software PRNG to refresh masks and secure intermediate values.
-
----
-
-### Masked AES S-Box
-
-The AES S-box is computed via the standard decomposition:
-
-1. Compute multiplicative inverse in **GF(2⁸)**
-2. Apply the AES affine transformation
-
-The implementation performs these operations on masked shares and reconstructs the result afterwards.
-
-Correctness is validated against the reference AES S-box table defined in `aes_const.h`. 
+Randomness is generated via a software PRNG and used to refresh mask values during secure operations.
 
 ---
 
-### Finite Field Arithmetic
+## Masked AES S-Box
 
-The implementation includes branch-free arithmetic for operations in **GF(2⁸)**, including:
+The AES S-box computation follows the classical decomposition:
 
-* field multiplication
+1. multiplicative inverse in **GF(2⁸)**
+2. affine transformation
+
+Both operations are executed on **shared values**, ensuring that intermediate states remain masked throughout the computation.
+
+---
+
+## Finite Field Arithmetic
+
+The implementation uses branch-free arithmetic for operations in **GF(2⁸)**, including:
+
+* multiplication using log/exp tables
 * exponentiation
-* lookup tables for log/exp representation
+* affine transformations
 
-These operations are required for implementing the masked inversion used in the AES S-box.
-
----
-
-## Environment Context
-
-The code was originally developed inside a **course-provided embedded development environment** that included:
-
-* OpenTitan firmware framework
-* Ibex RISC-V processor model
-* QEMU-based simulation
-* UART logging infrastructure
-* a VirtualBox development image
-
-The main program integrates with the OpenTitan runtime and uses UART logging to output the computed S-box values and validation results. 
-
-Because the full environment is large and provided by the course infrastructure, it is **not included in this repository**.
+These primitives are required for constructing the masked inversion used in the AES S-box.
 
 ---
 
-## Project Status
+# Development Context
 
-This repository is preserved as a **portfolio artifact** demonstrating:
+The implementation was originally developed within a **larger embedded firmware environment** used for experimentation with cryptographic algorithms.
 
-* implementation of side-channel resistant cryptographic algorithms
+The environment included:
+
+* a RISC-V processor model
+* firmware libraries and runtime support
+* UART logging utilities
+* a simulation setup for executing firmware images
+
+Within this environment, the program computes the masked AES S-box and verifies correctness against a reference table.
+
+Because this environment is large and contains external dependencies, it is **not included in this repository**.
+
+---
+
+# Project Status
+
+This repository is preserved as a **technical portfolio artifact** demonstrating:
+
+* implementation of side-channel resistant cryptographic primitives
 * low-level C development
-* work inside a large embedded firmware codebase
+* work within a large embedded firmware codebase
 
-It is **not intended to be a standalone buildable project**.
-
----
-
-## Course Context
-
-The project was developed as part of the TUM course:
-
-**Advanced Cryptographic Implementations**
-
-Topics covered in the course included:
-
-* side-channel attacks and countermeasures
-* higher-order masking schemes
-* masked implementations of cryptographic primitives
-* embedded cryptography
-* efficient finite-field arithmetic
-
----
-
-## License
-
-This repository contains coursework implementation artifacts and is provided for **demonstration and portfolio purposes**.
+The repository is **not intended to be a standalone buildable project**.
