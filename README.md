@@ -8,8 +8,6 @@ The implementation was developed in C within an embedded development environment
 
 This repository preserves the **core implementation files** as a portfolio artifact.
 
----
-
 # Project Overview
 
 Cryptographic algorithms deployed on real hardware can leak secret information through physical side channels such as:
@@ -28,8 +26,6 @@ This project demonstrates the implementation of a **masked AES S-box** using the
 * masked inversion in the AES field
 * reconstruction of the AES S-box output
 * validation against the reference AES S-box
-
----
 
 # Repository Structure
 
@@ -52,8 +48,6 @@ These files implement:
 
 The surrounding firmware framework and simulation environment used during development are **not included**.
 
----
-
 # Implementation Details
 
 ## Masked Representation
@@ -68,15 +62,11 @@ where `d` denotes the **masking order**.
 
 Each share individually appears random, while their XOR reconstructs the original value.
 
----
-
 ## Secure Multiplication
 
 Multiplication between masked values is implemented using the **ISW multiplication protocol**, which introduces fresh randomness to prevent leakage during intermediate computations.
 
 Randomness is generated via a software PRNG and used to refresh mask values during secure operations.
-
----
 
 ## Masked AES S-Box
 
@@ -87,8 +77,6 @@ The AES S-box computation follows the classical decomposition:
 
 Both operations are executed on **shared values**, ensuring that intermediate states remain masked throughout the computation.
 
----
-
 ## Finite Field Arithmetic
 
 The implementation uses branch-free arithmetic for operations in **GF(2⁸)**, including:
@@ -98,8 +86,6 @@ The implementation uses branch-free arithmetic for operations in **GF(2⁸)**, i
 * affine transformations
 
 These primitives are required for constructing the masked inversion used in the AES S-box.
-
----
 
 # Development Context
 
@@ -115,8 +101,6 @@ The environment included:
 Within this environment, the program computes the masked AES S-box and verifies correctness against a reference table.
 
 Because this environment is large and contains external dependencies, it is **not included in this repository**.
-
----
 
 # Project Status
 
